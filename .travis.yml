@@ -1,0 +1,29 @@
+language: rust
+rust: stable
+env:
+  global:
+    - TARGET_BUILD=thumbv6m-none-eabi
+    - RUSTFLAGS="--deny warnings"
+
+stages:
+  - stylecheck
+  - test
+  - build
+
+jobs:
+  include:
+    - stage: stylecheck
+      script:
+        - rustup component add rustfmt
+        - cargo fmt --all -- --check
+    - stage: test
+      script:
+        - cargo test --all-features --no-fail-fast --all
+    - stage: build
+      script:
+        - rustup target add $TARGET_BUILD
+        - cargo build --package smolbigint --target $TARGET_BUILD
+
+notifications:
+  email:
+    on_success: never
