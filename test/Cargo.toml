@@ -11,3 +11,4 @@ edition = "2018"
 [dev-dependencies]
 smolbigint = { path = "../core" }
 proptest = "0.9.4"
+num-bigint = "0.2.2"
