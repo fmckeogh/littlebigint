@@ -8,6 +8,10 @@ Honestly, you're probably much better off using [`num-bigint`](https://github.co
 
 Quite the pep talk, I know.
 
+## Contributing
+
+Issues and PRs very welcome :)
+
 ## License
 
-GNU General Public License ([https://www.gnu.org/licenses/gpl-3.0.txt](https://www.gnu.org/licenses/gpl-3.0.txt) or [LICENSE.md](LICENSE.md)).
+Distributed under the same license as [`num-bigint`](https://github.com/rust-num/num-bigint), Apache 2.0/MIT.
