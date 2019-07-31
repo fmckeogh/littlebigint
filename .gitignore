@@ -2,4 +2,4 @@
 **/*.rs.bk
 Cargo.lock
 
-test/proptest-regressions
+**/proptest-regressions

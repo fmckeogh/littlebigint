@@ -1,14 +1,7 @@
-use {num_bigint::BigUint as NumBigUint, proptest::prelude::*, smolbigint::BigUint};
-
-// Used due to API differences between the libraries; in `num_bigint` it makes sense to always
-// trim leading zeros, in `smolbigint` allocations cannot be made if a number needs to be bigger
-fn trim_leading_zeros(slice: &mut [u8]) -> &mut [u8] {
-    let index = slice.len() - slice.iter().rev().filter(|x| x == &&0).count();
-    slice.split_at_mut(index).0
-}
-fn assert_eq_trimmed(a: &mut [u8], b: &mut [u8]) {
-    assert_eq!(trim_leading_zeros(a), trim_leading_zeros(b))
-}
+use {
+    crate::assert_eq_trimmed, num_bigint::BigUint as NumBigUint, proptest::prelude::*,
+    smolbigint::BigUint,
+};
 
 #[test]
 fn basic_addition() {
@@ -47,7 +40,7 @@ proptest! {
         let mut b_array = [b];
         let b_bigint = BigUint::from_slice(&mut b_array);
 
-        assert_eq!((a as u16 + b as u16).to_le_bytes(), (a_bigint + b_bigint).to_slice());
+        assert_eq!((a as u16 + b as u16).to_le_bytes(), (a_bigint + b_bigint).into_slice());
     }
 
     #[test]
@@ -67,6 +60,6 @@ proptest! {
         let a = BigUint::from_slice(&mut a);
         let b = BigUint::from_slice(&mut b);
 
-        assert_eq_trimmed(correct.as_mut_slice(), (a + b).to_slice());
+        assert_eq_trimmed(correct.as_mut_slice(), (a + b).into_slice());
     }
 }
