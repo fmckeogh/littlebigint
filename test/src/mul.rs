@@ -55,13 +55,13 @@ proptest! {
     #[test]
     fn big_multiplication(mut a: Vec<u8>, mut b: Vec<u8>) {
         // Ignore zero-length inputs and prevent panicking due to overflow
-        if a.len() < b.len() || a.len() == 0 {
+        if a.len() < b.len() || a.is_empty() {
             return Ok(());
         }
 
         let mut correct = (NumBigUint::from_bytes_le(&a) * NumBigUint::from_bytes_le(&b)).to_bytes_le();
 
-        for _ in 0..(b.len() + 1) {
+        for _ in 0..=b.len() {
             a.push(0);
         }
         let len = a.len() + b.len();
@@ -73,25 +73,3 @@ proptest! {
         assert_eq_trimmed(correct.as_mut_slice(), (a.mul(&b, &mut buf)).into_slice());
     }
 }
-/*
-#[test]
-fn temp() {
-    let mut a_array = vec![
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    ];
-    let a = BigUint::from_slice(&mut a_array);
-
-    let mut b_array = vec![0, 0];
-    let b = BigUint::from_slice(&mut b_array);
-
-    let mut buf = vec![
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    ];
-
-    dbg!(a.mul(&b, &mut buf));
-
-    assert_eq!
-}
-*/

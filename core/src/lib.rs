@@ -7,7 +7,7 @@ extern crate std;
 use core::{
     cmp::{self, PartialEq},
     fmt,
-    ops::{Add, AddAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Shl, ShlAssign, Sub, SubAssign},
 };
 
 #[derive(Debug)]
@@ -35,7 +35,7 @@ impl<'a, 'b, 'c> BigUint<'a> {
     }
 
     pub fn mul_assign(&mut self, val: &BigUint<'b>, buf: &'c mut [u8]) {
-        // Zero buf just in case
+        // Zero out buf just in case (maybe just check it is zero and fail otherwise?)
         for byte in buf.iter_mut() {
             *byte = 0;
         }
@@ -53,6 +53,10 @@ impl<'a, 'b, 'c> BigUint<'a> {
         for (i, byte) in buf.iter_mut().enumerate().take(index) {
             self.0[i] = *byte;
         }
+    }
+
+    pub fn div_rem(self, val: BigUint<'b>) -> (BigUint<'a>, BigUint<'b>) {
+        (self, val)
     }
 }
 
@@ -132,11 +136,29 @@ impl<'a, 'b> SubAssign<BigUint<'b>> for BigUint<'a> {
             }
         }
 
-        // note: we're _required_ to fail on underflow
         assert!(
             borrow == 0 && b_hi.iter().all(|x| *x == 0),
             "Underflowed during SubAssign"
         );
+    }
+}
+
+impl<'a, 'b> Shl<usize> for BigUint<'a> {
+    type Output = BigUint<'a>;
+
+    fn shl(mut self, rhs: usize) -> Self::Output {
+        self <<= rhs;
+        self
+    }
+}
+
+impl<'a, 'b> ShlAssign<usize> for BigUint<'a> {
+    fn shl_assign(&mut self, mut rhs: usize) {
+        while rhs > 8 {
+            rhs -= 8;
+            shl(self.0, 8);
+        }
+        shl(self.0, rhs as u8);
     }
 }
 
@@ -197,6 +219,19 @@ fn mac3(acc: &mut [u8], b: &[u8], c: &[u8]) {
     }
 }
 
+fn shl(n: &mut [u8], bits: u8) {
+    let mut carry = 0u8;
+
+    for byte in n {
+        let shifted = u16::from(*byte) << bits;
+        let lower = shifted as u8;
+
+        *byte = lower + carry;
+
+        carry = (shifted >> 8) as u8;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use {super::*, num_bigint::BigUint as NumBigUint, proptest::prelude::*, std::prelude::v1::*};
@@ -209,7 +244,7 @@ mod tests {
     proptest! {
         #[test]
         fn mac_digit_prop(a: Vec<u8>, b: Vec<u8>, c: u8) {
-            if a.len() < b.len() || a.len() == 0 {
+            if a.len() < b.len() || a.is_empty() {
                 return Ok(());
             }
 

@@ -3,10 +3,12 @@ mod add;
 #[cfg(test)]
 mod mul;
 #[cfg(test)]
+mod shl;
+#[cfg(test)]
 mod sub;
 
 // Used due to API differences between the libraries; in `num_bigint` it makes sense to always
-// trim leading zeros, in `smolbigint` allocations cannot be made if a number needs to be bigger
+// trim leading zeros, in `littlebigint` allocations cannot be made if a number needs to be bigger
 fn trim_leading_zeros(slice: &mut [u8]) -> &mut [u8] {
     let index = slice.len() - slice.iter().rev().take_while(|x| x == &&0).count();
     slice.split_at_mut(index).0

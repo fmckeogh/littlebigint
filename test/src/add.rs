@@ -46,7 +46,7 @@ proptest! {
     #[test]
     fn big_addition(mut a: Vec<u8>, mut b: Vec<u8>) {
         // Ignore zero-length inputs
-        if a.len() == 0 || b.len() == 0 {
+        if a.is_empty() || b.is_empty() {
             return Ok(());
         }
 
