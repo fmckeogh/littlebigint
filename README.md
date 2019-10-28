@@ -1,7 +1,7 @@
-# smolbigint
+# littlebigint
 
-[![Build Status](https://travis-ci.org/chocol4te/smolbigint.svg?branch=master)](https://travis-ci.org/chocol4te/smolbigint)
-[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=chocol4te/smolbigint)](https://dependabot.com)
+[![Build Status](https://travis-ci.com/chocol4te/littlebigint.svg?branch=master)](https://travis-ci.com/chocol4te/littlebigint)
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=chocol4te/littlebigint)](https://dependabot.com)
 
 Zero allocation big integer library for `no_std` Rust, borrowing heavily in terms of code and algorithms from [`num-bigint`](https://github.com/rust-num/num-bigint).
 

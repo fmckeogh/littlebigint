@@ -1,5 +1,5 @@
 [package]
-name = "smolbigint"
+name = "littlebigint"
 version = "0.1.0"
 authors = ["Ferdia McKeogh <ferdia@mckeogh.tech>"]
 edition = "2018"
@@ -10,4 +10,4 @@ edition = "2018"
 
 [dev-dependencies]
 proptest = "0.9.4"
-num-bigint = "0.2.2"
+num-bigint = "0.2.3"

@@ -22,7 +22,7 @@ jobs:
     - stage: build
       script:
         - rustup target add $TARGET_BUILD
-        - cargo build --package smolbigint --target $TARGET_BUILD
+        - cargo build --package littlebigint --target $TARGET_BUILD
 
 notifications:
   email:

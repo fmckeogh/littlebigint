@@ -1,6 +1,6 @@
 use {
-    crate::assert_eq_trimmed, num_bigint::BigUint as NumBigUint, proptest::prelude::*,
-    smolbigint::BigUint,
+    crate::assert_eq_trimmed, littlebigint::BigUint, num_bigint::BigUint as NumBigUint,
+    proptest::prelude::*,
 };
 
 #[test]
