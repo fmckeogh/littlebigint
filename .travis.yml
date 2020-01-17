@@ -3,12 +3,25 @@ rust: stable
 env:
   global:
     - TARGET_BUILD=thumbv6m-none-eabi
-    - RUSTFLAGS="--deny warnings"
+    - RUSTFLAGS="--deny warnings -C link-dead-code"
+
+addons:
+  apt:
+    packages:
+      - libssl-dev
+
+cache:
+  directories:
+    - /home/travis/.cargo
+
+before_cache:
+  - rm -rf /home/travis/.cargo/registry
 
 stages:
   - stylecheck
   - test
   - build
+  - coverage
 
 jobs:
   include:
@@ -23,6 +36,11 @@ jobs:
       script:
         - rustup target add $TARGET_BUILD
         - cargo build --package littlebigint --target $TARGET_BUILD
+    - stage: coverage
+      script: |
+        cargo install cargo-tarpaulin || true
+        cargo tarpaulin -v --ignore-tests --out Xml
+        bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email:
