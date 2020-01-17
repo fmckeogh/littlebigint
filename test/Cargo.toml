@@ -8,5 +8,5 @@ edition = "2018"
 
 [dev-dependencies]
 littlebigint = { path = "../core" }
-proptest = "0.9.4"
-num-bigint = "0.2.3"
+proptest = "0.9.5"
+num-bigint = "0.2.5"
