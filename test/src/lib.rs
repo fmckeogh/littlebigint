@@ -1,11 +1,13 @@
-#[cfg(test)]
+#![cfg(test)]
+
 mod add;
-#[cfg(test)]
+mod cmp;
+mod div_rem;
 mod mul;
-#[cfg(test)]
 mod shl;
-#[cfg(test)]
+mod shr;
 mod sub;
+mod zero;
 
 // Used due to API differences between the libraries; in `num_bigint` it makes sense to always
 // trim leading zeros, in `littlebigint` allocations cannot be made if a number needs to be bigger

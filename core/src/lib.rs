@@ -5,9 +5,13 @@
 extern crate std;
 
 use core::{
-    cmp::{self, PartialEq},
+    cmp::{
+        self, Ord,
+        Ordering::{self, Equal, Greater, Less},
+        PartialEq,
+    },
     fmt,
-    ops::{Add, AddAssign, Shl, ShlAssign, Sub, SubAssign},
+    ops::{Add, AddAssign, Shl, ShlAssign, Shr, ShrAssign, Sub, SubAssign},
 };
 
 #[derive(Debug)]
@@ -22,11 +26,20 @@ impl<'a, 'b> fmt::Display for BigUint<'a> {
 
 impl<'a, 'b, 'c> BigUint<'a> {
     pub fn from_slice(slice: &'a mut [u8]) -> Self {
+        assert!(slice.len() > 0);
         Self(slice)
     }
 
     pub fn into_slice(self) -> &'a mut [u8] {
         self.0
+    }
+
+    pub fn is_zero(&self) -> bool {
+        self.0.iter().all(|&b| b == 0)
+    }
+
+    pub fn zero(&mut self) {
+        self.0.iter_mut().for_each(|b| *b = 0);
     }
 
     pub fn mul(mut self, val: &BigUint<'b>, buf: &'c mut [u8]) -> Self {
@@ -55,8 +68,37 @@ impl<'a, 'b, 'c> BigUint<'a> {
         }
     }
 
-    pub fn div_rem(self, val: BigUint<'b>) -> (BigUint<'a>, BigUint<'b>) {
-        (self, val)
+    /// Ref: Knuth Vol 2 Ch 4.3.1 p 272 Algorithm D.
+    pub fn div_rem(mut self, mut rhs: BigUint<'b>) -> (BigUint<'a>, BigUint<'b>) {
+        if self.is_zero() {
+            self.zero();
+            rhs.zero();
+            return (self, rhs);
+        }
+
+        if rhs.is_zero() {
+            panic!("Cannot divide by 0!");
+        }
+
+        match self.cmp(&rhs) {
+            Less => {
+                rhs.zero();
+                rhs.0.copy_from_slice(&self.0);
+                self.zero();
+
+                return (self, rhs);
+            }
+            Equal => {
+                self.zero();
+                self.0[0] = 1;
+                rhs.zero();
+
+                return (self, rhs);
+            }
+            Greater => {}
+        }
+
+        (self, rhs)
     }
 }
 
@@ -162,6 +204,39 @@ impl<'a, 'b> ShlAssign<usize> for BigUint<'a> {
     }
 }
 
+impl<'a, 'b> Shr<usize> for BigUint<'a> {
+    type Output = BigUint<'a>;
+
+    fn shr(mut self, rhs: usize) -> Self::Output {
+        self >>= rhs;
+        self
+    }
+}
+
+impl<'a, 'b> ShrAssign<usize> for BigUint<'a> {
+    fn shr_assign(&mut self, mut rhs: usize) {
+        while rhs > 8 {
+            rhs -= 8;
+            shr(self.0, 8);
+        }
+        shr(self.0, rhs as u8);
+    }
+}
+
+impl<'a> Eq for BigUint<'a> {}
+
+impl<'a> PartialOrd for BigUint<'a> {
+    fn partial_cmp(&self, rhs: &BigUint) -> Option<Ordering> {
+        Some(self.cmp(rhs))
+    }
+}
+
+impl<'a, 'b> Ord for BigUint<'a> {
+    fn cmp(&self, rhs: &BigUint) -> Ordering {
+        cmp_slice(&self.0[..], &rhs.0[..])
+    }
+}
+
 // Add with carry
 fn adc(a: u8, b: u8, acc: &mut u16) -> u8 {
     *acc += u16::from(a);
@@ -229,6 +304,35 @@ fn shl(n: &mut [u8], bits: u8) {
         *byte = lower + carry;
 
         carry = (shifted >> 8) as u8;
+    }
+}
+
+fn shr(n: &mut [u8], bits: u8) {
+    let mut carry = 0u8;
+
+    for byte in n.iter_mut().rev() {
+        let shifted = (u16::from(*byte) << 8) >> bits;
+        let upper = (shifted >> 8) as u8;
+
+        *byte = upper + carry;
+
+        carry = shifted as u8;
+    }
+}
+
+fn cmp_slice<'a, 'b>(a: &'a [u8], b: &'b [u8]) -> Ordering {
+    let a = {
+        let index = a.len() - a.iter().rev().take_while(|x| x == &&0).count();
+        a.split_at(index).0
+    };
+    let b = {
+        let index = b.len() - b.iter().rev().take_while(|x| x == &&0).count();
+        b.split_at(index).0
+    };
+
+    match Ord::cmp(&a.len(), &b.len()) {
+        Equal => Iterator::cmp(a.iter().rev(), b.iter().rev()),
+        other => other,
     }
 }
 

@@ -55,7 +55,7 @@ proptest! {
     #[test]
     fn big_multiplication(mut a: Vec<u8>, mut b: Vec<u8>) {
         // Ignore zero-length inputs and prevent panicking due to overflow
-        if a.len() < b.len() || a.is_empty() {
+        if a.is_empty() || b.is_empty() || a.len() < b.len() {
             return Ok(());
         }
 
